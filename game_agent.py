@@ -4,7 +4,6 @@ and include the results in your report.
 """
 import random
 
-
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
@@ -212,10 +211,48 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
+        legal_moves = game.get_legal_moves()
+        
+        value = float("-inf")
+        bestMove = (-1, -1)
+        for move in legal_moves:
+            v = self.minValue(game.forecast_move(move), depth)
+            if v > value:
+                value = v
+                bestMove = move
+        return bestMove
+        
         # TODO: finish this function!
-        raise NotImplementedError
+        #raise NotImplementedError
 
-
+    def minValue(self, game, depth):
+        if self.time_left() < self.TIMER_THRESHOLD: 
+            raise SearchTimeout()
+        
+        legal_moves = game.get_legal_moves()
+        
+        if (depth == 1) or len(legal_moves) == 0:
+            return self.score(game, self)
+        
+        v = float("inf")
+        for move in legal_moves:
+            v = min(v, self.maxValue(game.forecast_move(move), depth-1))
+        return v
+        
+    def maxValue(self, game, depth):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        legal_moves = game.get_legal_moves()
+        if (depth == 1) or len(legal_moves) == 0:
+            return self.score(game, self)
+        
+        v = float("-inf")
+        for move in legal_moves:
+            v = max(v, self.minValue(game.forecast_move(move), depth-1))
+        return v
+    
+    
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to
