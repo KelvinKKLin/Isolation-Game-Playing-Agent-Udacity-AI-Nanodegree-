@@ -33,9 +33,20 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    # Take a ratio between the number of moves you have left versus the
+    # number of moves the opponent has left.
+    if game.is_loser(player):
+        return float("-inf")
 
+    if game.is_winner(player):
+        return float("inf")
+
+    opponent = game.get_opponent(player)
+    opponent_moves = len(game.get_legal_moves(opponent))
+    if opponent_moves == 0:
+        return float("inf")
+    else:
+        return float(len(game.get_legal_moves(player))) / len(game.get_legal_moves(opponent))
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -59,9 +70,18 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    
+    opponent = game.get_opponent(player)
+    opponent_moves = len(game.get_legal_moves(opponent))
+    if opponent_moves == 0:
+        score = float("inf")
+    else:
+        score = float(len(game.get_legal_moves(player))) / len(game.get_legal_moves(opponent))
 
+    
+    score = score * float(len(game.get_legal_moves(player)))
+    
+    return score
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -85,8 +105,20 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    
+    opponent = game.get_opponent(player)
+    opponent_moves = len(game.get_legal_moves(opponent))
+    if opponent_moves == 0:
+        score = float("inf")
+    else:
+        score = float(len(game.get_legal_moves(player))) / len(game.get_legal_moves(opponent))
+
+    
+    score = score * float(len(game.get_legal_moves(player))) 
+    
+    score = score * (len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.get_opponent(player))))
+    
+    return score
 
 
 class IsolationPlayer:
@@ -294,7 +326,11 @@ class AlphaBetaPlayer(IsolationPlayer):
         
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = (-1, -1)
+        legal_moves = game.get_legal_moves()
+        if len(legal_moves) > 0:
+            best_move = legal_moves[0]
+        else:
+            best_move = (-1, -1)
         max_int = 2**63
         try:
             # The try/except block will automatically catch the exception
@@ -359,14 +395,19 @@ class AlphaBetaPlayer(IsolationPlayer):
         legal_moves = game.get_legal_moves()
         
         value = float("-inf")
-        bestMove = (-1, -1)
+        
+        if len(legal_moves) > 0:
+            bestMove = legal_moves[0]
+        else:
+            bestMove = (-1, -1)
+        
         for move in legal_moves:
             v = self.minValue(game.forecast_move(move), alpha, beta, depth)
             if v > value:
                 value = v
                 bestMove = move
             if v >= beta:
-                return bestMove
+                return move
             alpha = max(alpha, v)
         return bestMove
     
