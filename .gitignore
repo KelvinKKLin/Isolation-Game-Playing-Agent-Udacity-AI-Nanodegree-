@@ -95,6 +95,6 @@ ENV/
 .ropeproject
 
 #PDF Reports
-.pdf
+*.pdf
 
 # End of https://www.gitignore.io/api/python
