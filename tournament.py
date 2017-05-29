@@ -77,27 +77,32 @@ def update(total_wins, wins):
     return total_wins
 
 
-def play_matches(cpu_agents, test_agents, num_matches):
+def play_matches(cpu_agents, test_agents, num_matches, l):
+
+    #Whether an agent had over 70% win rate
+    over70 = False
+    paramsForMaxAgentOver70 = ""
     """Play matches between the test agent and each cpu_agent individually. """
     total_wins = {agent.player: 0 for agent in test_agents}
     total_timeouts = 0.
     total_forfeits = 0.
     total_matches = 2 * num_matches * len(cpu_agents)
 
-    print("\n{:^9}{:^13}{:^13}{:^13}{:^13}{:^13}".format(
+    l.write("\n{:^9}{:^13}{:^13}{:^13}{:^13}{:^13}{:^13}\n".format(
         "Match #", "Opponent", test_agents[0].name, test_agents[1].name,
-        test_agents[2].name, test_agents[3].name))
-    print("{:^9}{:^13} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5}"
-          .format("", "", *(["Won", "Lost"] * 4)))
+        test_agents[2].name, test_agents[3].name, test_agents[4].name))
+    l.write("{:^9}{:^13} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5}\n"
+          .format("", "", *(["Won", "Lost"] * 5)))
 
     for idx, agent in enumerate(cpu_agents):
         wins = {test_agents[0].player: 0,
                 test_agents[1].player: 0,
                 test_agents[2].player: 0,
                 test_agents[3].player: 0,
+                test_agents[4].player: 0,
                 agent.player: 0}
 
-        print("{!s:^9}{:^13}".format(idx + 1, agent.name), end="", flush=True)
+        l.write("{!s:^9}{:^13}\n".format(idx + 1, agent.name))
 
         counts = play_round(agent, test_agents, wins, num_matches)
         total_timeouts += counts[0]
@@ -106,54 +111,123 @@ def play_matches(cpu_agents, test_agents, num_matches):
         _total = 2 * num_matches
         round_totals = sum([[wins[agent.player], _total - wins[agent.player]]
                             for agent in test_agents], [])
-        print(" {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5}"
+        l.write(" {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5} {:^5}| {:^5}\n"
               .format(*round_totals))
 
-    print("-" * 74)
-    print("{:^9}{:^13}{:^13}{:^13}{:^13}{:^13}\n".format(
+    l.write("-" * 74 + "\n")
+    l.write("{:^9}{:^13}{:^13}{:^13}{:^13}{:^13}\n".format(
         "", "Win Rate:",
         *["{:.1f}%".format(100 * total_wins[a.player] / total_matches)
           for a in test_agents]
     ))
 
-    if total_timeouts:
-        print(("\nThere were {} timeouts during the tournament -- make sure " +
-               "your agent handles search timeout correctly, and consider " +
-               "increasing the timeout margin for your agent.\n").format(
-            total_timeouts))
-    if total_forfeits:
-        print(("\nYour ID search forfeited {} games while there were still " +
-               "legal moves available to play.\n").format(total_forfeits))
+    print("GAME FINISHED")
 
+    #Genetic algorithm
+    win_rate = []
+    top3agents = []
+    for a in test_agents:
+        win_rate.append(100 * total_wins[a.player] / total_matches)
+
+    maxAgentWinRate = float("-inf")
+    win_rate.sort()
+    for a in test_agents:
+        agentWinRate = 100 * total_wins[a.player] / total_matches
+        if (agentWinRate >= 70) and (agentWinRate > maxAgentWinRate):
+            maxAgentWinRate = agentWinRate
+            over70 = True
+        if (agentWinRate == win_rate[-1]) or (agentWinRate == win_rate[-2]) or (agentWinRate == win_rate[-3]):
+            top3agents.append(a)
+
+    #Crossover
+    new_param1 = []
+    new_param2 = []
+
+    for i in range(5):
+        parent1 = random.randrange(0, 3)
+        parent2 = random.randrange(0, 3)
+        new_params1.append(top3agents[parent1].getParams()[i])
+        new_params2.append(top3agents[parent2].getParams()[i])
+
+    #Mutation
+    for i in range(5):
+        mutationRate1 = random.random()
+        mutationRate2 = random.random()
+        if mutationRate1 < 0.1:
+            new_params1[i] = random.gauss(0, 10)
+        if mutationRate2 < 0.1:
+            new_params2[i] = random.gauss(0, 10)
+
+    return top3agents[0].getParams(), top3agents[1].getParams(), top3agents[2].getParams(), new_param1, new_param2, over70, maxAgentWinRate
 
 def main():
 
-    # Define two agents to compare -- these agents will play from the same
-    # starting position against the same adversaries in the tournament
-    test_agents = [
-        Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved"),
-        Agent(AlphaBetaPlayer(score_fn=custom_score), "AB_Custom"),
-        Agent(AlphaBetaPlayer(score_fn=custom_score_2), "AB_Custom_2"),
-        Agent(AlphaBetaPlayer(score_fn=custom_score_3), "AB_Custom_3")
-    ]
+    f = open('C:/Users/Owner/Desktop/ga_results.txt', 'w')
+    l = open('C:/Users/Owner/Desktop/ga_log.txt', 'w')
 
-    # Define a collection of agents to compete against the test agents
-    cpu_agents = [
-        Agent(RandomPlayer(), "Random"),
-        Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
-        Agent(MinimaxPlayer(score_fn=center_score), "MM_Center"),
-        Agent(MinimaxPlayer(score_fn=improved_score), "MM_Improved"),
-        Agent(AlphaBetaPlayer(score_fn=open_move_score), "AB_Open"),
-        Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center"),
-        Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved")
-    ]
+    #Parameters for genetic algorithm
+    params1 = [random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10)]
+    params2 = [random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10)]
+    params3 = [random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10)]
+    params4 = [random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10)]
+    params5 = [0.2, 0.2, 0.2, 0.2, 0.2]
+    iteration = 1
 
-    print(DESCRIPTION)
-    print("{:^74}".format("*************************"))
-    print("{:^74}".format("Playing Matches"))
-    print("{:^74}".format("*************************"))
-    play_matches(cpu_agents, test_agents, NUM_MATCHES)
+    try:
+        while True:
+            print("Running Iteration: " + str(iteration))
+            l.write("ITERATION: " + str(iteration) + "\n")
+            iteration = iteration+1
 
+            l.write("PARAMETER 1: " + str(params1) + "\n")
+            l.write("PARAMETER 2: " + str(params2) + "\n")
+            l.write("PARAMETER 3: " + str(params3) + "\n")
+            l.write("PARAMETER 4: " + str(params4) + "\n")
+            l.write("PARAMETER 5: " + str(params5) + "\n")
+            l.write("---------------------------------\n")
+
+            # Define two agents to compare -- these agents will play from the same
+            # starting position against the same adversaries in the tournament
+            test_agents = [
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params1), "Agent_1"),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params2), "Agent_2"),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params3), "Agent_3"),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params4), "Agent_4"),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params5), "Agent_5")
+            ]
+
+            # Define a collection of agents to compete against the test agents
+            cpu_agents = [
+                Agent(RandomPlayer(), "Random"),
+                Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
+                Agent(MinimaxPlayer(score_fn=center_score), "MM_Center"),
+                Agent(MinimaxPlayer(score_fn=improved_score), "MM_Improved"),
+                Agent(AlphaBetaPlayer(score_fn=open_move_score), "AB_Open"),
+                Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center"),
+                Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved")
+            ]
+
+            l.write("{:^74}\n".format("*************************"))
+            l.write("{:^74}\n".format("Playing Matches"))
+            l.write("{:^74}\n".format("*************************"))
+            p1, p2, p3, p4, p5, o70, mawr = play_matches(cpu_agents, test_agents, NUM_MATCHES, l)
+
+            params1 = p1
+            params2 = p2
+            params3 = p3
+            params4 = p4
+            params5 = p5
+
+            if o70:
+                f.write(str(mwar) + '\n')
+
+    except KeyboardInterrupt:
+        f.close()
+        l.close()
+
+    #except:
+    #    f.close()
+    #    print("An Error Occured")
 
 if __name__ == "__main__":
     main()
