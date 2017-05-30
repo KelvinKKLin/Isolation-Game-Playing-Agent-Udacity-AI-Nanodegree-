@@ -34,7 +34,7 @@ ID and alpha-beta search with the custom_score functions defined in
 game_agent.py.
 """
 
-Agent = namedtuple("Agent", ["player", "name"])
+Agent = namedtuple("Agent", ["player", "name", "params"])
 
 
 def play_round(cpu_agent, test_agents, win_counts, num_matches):
@@ -146,19 +146,19 @@ def play_matches(cpu_agents, test_agents, num_matches, l):
     for i in range(5):
         parent1 = random.randrange(0, 3)
         parent2 = random.randrange(0, 3)
-        new_params1.append(top3agents[parent1].getParams()[i])
-        new_params2.append(top3agents[parent2].getParams()[i])
+        new_param1.append(top3agents[parent1].params[i])
+        new_param2.append(top3agents[parent2].params[i])
 
     #Mutation
     for i in range(5):
         mutationRate1 = random.random()
         mutationRate2 = random.random()
         if mutationRate1 < 0.1:
-            new_params1[i] = random.gauss(0, 10)
+            new_param1[i] = random.gauss(0, 10)
         if mutationRate2 < 0.1:
-            new_params2[i] = random.gauss(0, 10)
+            new_param2[i] = random.gauss(0, 10)
 
-    return top3agents[0].getParams(), top3agents[1].getParams(), top3agents[2].getParams(), new_param1, new_param2, over70, maxAgentWinRate
+    return top3agents[0].params, top3agents[1].params, top3agents[2].params, new_param1, new_param2, over70, maxAgentWinRate
 
 def main():
 
@@ -166,6 +166,7 @@ def main():
     l = open('C:/Users/Owner/Desktop/ga_log.txt', 'w')
 
     #Parameters for genetic algorithm
+    params0 = []
     params1 = [random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10)]
     params2 = [random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10)]
     params3 = [random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10), random.gauss(0, 10)]
@@ -189,22 +190,22 @@ def main():
             # Define two agents to compare -- these agents will play from the same
             # starting position against the same adversaries in the tournament
             test_agents = [
-                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params1), "Agent_1"),
-                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params2), "Agent_2"),
-                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params3), "Agent_3"),
-                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params4), "Agent_4"),
-                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params5), "Agent_5")
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params1), "Agent_1", params1),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params2), "Agent_2", params2),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params3), "Agent_3", params3),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params4), "Agent_4", params4),
+                Agent(AlphaBetaPlayer(score_fn=custom_score_3, params=params5), "Agent_5", params5)
             ]
 
             # Define a collection of agents to compete against the test agents
             cpu_agents = [
-                Agent(RandomPlayer(), "Random"),
-                Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
-                Agent(MinimaxPlayer(score_fn=center_score), "MM_Center"),
-                Agent(MinimaxPlayer(score_fn=improved_score), "MM_Improved"),
-                Agent(AlphaBetaPlayer(score_fn=open_move_score), "AB_Open"),
-                Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center"),
-                Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved")
+                Agent(RandomPlayer(), "Random", params0),
+                Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open", params0),
+                Agent(MinimaxPlayer(score_fn=center_score), "MM_Center", params0),
+                Agent(MinimaxPlayer(score_fn=improved_score), "MM_Improved", params0),
+                Agent(AlphaBetaPlayer(score_fn=open_move_score), "AB_Open", params0),
+                Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center", params0),
+                Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved", params0)
             ]
 
             l.write("{:^74}\n".format("*************************"))
@@ -225,9 +226,9 @@ def main():
         f.close()
         l.close()
 
-    #except:
-    #    f.close()
-    #    print("An Error Occured")
+    except:
+        f.close()
+        print("An Error Occured")
 
 if __name__ == "__main__":
     main()
