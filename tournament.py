@@ -166,9 +166,9 @@ def play_matches(cpu_agents, test_agents, num_matches, l):
 
     for i in range(len(top3agents)):
         if isIdentical(new_param1, top3agents[i].params):
-            new_param1 = [random.gauss(0, 7), random.gauss(0, 13), random.gauss(0, 5), random.gauss(0, 11), random.gauss(0, 17)]
+            new_param1 = [random.gauss(0, 7), random.gauss(0, 13), random.gauss(0, 5)]
         if isIdentical(new_param2, top3agents[i].params):
-            new_param2 = [random.gauss(0, 13), random.gauss(0, 7), random.gauss(0, 17), random.gauss(0, 5), random.gauss(0, 11)]
+            new_param2 = [random.gauss(0, 13), random.gauss(0, 7), random.gauss(0, 17)]
 
     return top3agents[0].params, top3agents[1].params, top3agents[2].params, new_param1, new_param2, over70, maxAgentWinRate
 
