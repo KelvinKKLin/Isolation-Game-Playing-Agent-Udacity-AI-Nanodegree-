@@ -97,4 +97,9 @@ ENV/
 #PDF Reports
 *.pdf
 
+#LaTeX Documents
+*.aux
+*.synctex.gz
+
+
 # End of https://www.gitignore.io/api/python
