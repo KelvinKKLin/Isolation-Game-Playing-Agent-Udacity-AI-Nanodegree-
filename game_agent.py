@@ -92,24 +92,26 @@ def custom_score_2(game, player, params=[]):
     OMS = open_move_score(game, player)
     CS2 = center_score(game, player)
 
-    #Find the maximum and minimum
-    minimum = min(CS1, IS, OMS, CS2)
-    maximum = max(CS1, IS, OMS, CS2)
-
-    #If maximum and minimum are the same, then it does not matter which value
-    #we return since it will be the same.
-    if maximum == minimum:
-        return CS1
-    else:
-        #Normalize each value so we can make a fair comparison
-        #See https://stats.stackexchange.com/questions/70801/how-to-normalize-data-to-0-1-range
-        #for normalization technique
-        n_CS1 = float(CS1 - minimum)/(maximum-minimum)
-        n_IS = float(IS - minimum)/(maximum-minimum)
-        n_OMS = float(OMS - minimum)/(maximum-minimum)
-        n_CS2 = float(CS2 - minimum)/(maximum-minimum)
-
-    #Calculate and return the minimum of the normalized values
+    #Calculate the maximum for each heuristic
+    #For custom_score, it is max_player_move/1
+    #For improved_score, it is max_player_move - 1
+    #For open_move_score, it is max_player_move
+    #For center_score, it is (game.width/2.)**2 + (game.height/2.)**2
+    
+    #Assume we have a 7x7 grid = max_player_move = 8
+    max_player_move = 8.0
+    CS1_max = max_player_move
+    IS_max = max_player_move - 1
+    OMS_max = max_player_move
+    CS2_max = ((game.width/2.)**2 + (game.height/2.)**2)
+    
+    #Divide each score by its maximum
+    n_CS1 = CS1 / CS1_max
+    n_IS = IS / IS_max
+    n_OMS = OMS / OMS_max
+    n_CS2 = CS2 / CS2_max
+    
+    #Calculate and return the minimum of the values
     score = min(n_CS1, n_IS, n_OMS, n_CS2)
     return score
 
