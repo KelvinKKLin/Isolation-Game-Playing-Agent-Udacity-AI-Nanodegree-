@@ -33,6 +33,8 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
+    #This is the ratio evaluation function.
+
     #If the user lost, do not chose this branch unless nesscessary. Otherwise,
     #if the user has won, then choose this branch always.
     if game.is_loser(player):
@@ -73,6 +75,8 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+
+    #This is the pessimestic evaluation function
 
     #If the user lost, do not chose this branch unless nesscessary. Otherwise,
     #if the user has won, then choose this branch always.
@@ -137,18 +141,27 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    opponent = game.get_opponent(player)
-    opponent_moves = len(game.get_legal_moves(opponent))
-    if opponent_moves == 0:
-        score = float("inf")
-    else:
-        score = float(len(game.get_legal_moves(player))) / len(game.get_legal_moves(opponent))
+    #This is the 3 feature GA-trained evaluation function
 
+    #If the user lost, do not chose this branch unless nesscessary. Otherwise,
+    #if the user has won, then choose this branch always.
+    if game.is_loser(player):
 
-    score = score * float(len(game.get_legal_moves(player)))
+        return float("-inf")
 
-    score = score * (len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.get_opponent(player))))
+    if game.is_winner(player):
+        return float("inf")
 
+    #Weights of each scoring function
+    c1 = 5.626514543962844
+    c2 = 2.1318059635578575
+    c3 = -1.20092114580893
+
+    #Use each of the other scoring heuristics in the proportions according to
+    #c1...c5. Note that some features are deliberately represent two or more
+    #times by the scoring functions. This is done to see whether it would
+    #improve performance.
+    score = (c1*improved_score(game, player)) + (c2*open_move_score(game, player)) + (c3*center_score(game,player))
     return score
 
 #The following function was obtained from Udacity
