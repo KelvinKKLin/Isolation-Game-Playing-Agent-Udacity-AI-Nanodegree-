@@ -76,6 +76,52 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
+    #This is the 3 feature GA-trained evaluation function
+
+    #If the user lost, do not chose this branch unless nesscessary. Otherwise,
+    #if the user has won, then choose this branch always.
+    if game.is_loser(player):
+
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    #Weights of each scoring function
+    c1 = 5.626514543962844
+    c2 = 2.1318059635578575
+    c3 = -1.20092114580893
+
+    #Use each of the other scoring heuristics in the proportions according to
+    #c1...c5. Note that some features are deliberately represent two or more
+    #times by the scoring functions. This is done to see whether it would
+    #improve performance.
+    score = (c1*improved_score(game, player)) + (c2*open_move_score(game, player)) + (c3*center_score(game,player))
+    return score
+
+def custom_score_3(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
     #This is the pessimestic evaluation function
 
     #If the user lost, do not chose this branch unless nesscessary. Otherwise,
@@ -116,52 +162,6 @@ def custom_score_2(game, player):
 
     #Calculate and return the minimum of the values
     score = min(n_CS1, n_IS, n_OMS, n_CS2)
-    return score
-
-def custom_score_3(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
-
-    #This is the 3 feature GA-trained evaluation function
-
-    #If the user lost, do not chose this branch unless nesscessary. Otherwise,
-    #if the user has won, then choose this branch always.
-    if game.is_loser(player):
-
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-
-    #Weights of each scoring function
-    c1 = 5.626514543962844
-    c2 = 2.1318059635578575
-    c3 = -1.20092114580893
-
-    #Use each of the other scoring heuristics in the proportions according to
-    #c1...c5. Note that some features are deliberately represent two or more
-    #times by the scoring functions. This is done to see whether it would
-    #improve performance.
-    score = (c1*improved_score(game, player)) + (c2*open_move_score(game, player)) + (c3*center_score(game,player))
     return score
 
 #The following function was obtained from Udacity
